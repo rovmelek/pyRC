@@ -110,15 +110,18 @@ cmd_list = {
 
 
 def is_cmd(msgBody):
-    pattern = re.compile(r'^!([a-zA-Z]+)\s(.*)$', re.I)
-    cmd_option = pattern.match(msgBody)
+    pattern = re.compile(r'^!([a-zA-Z]+)(\s.*)?$', re.I)
+    cmd_option = pattern.search(msgBody)
     if not cmd_option:
-        logger.debug("\n==> Unable to parse command: {}"
-                     "\n==> Continue receive loop".format(msgBody))
+        logger.debug("{} is not a command".format(msgBody))
         return None, None
 
     cmd = cmd_option[1]
     option = cmd_option[2]
+
+    if option:
+        option = option.lstrip()
+
     logger.debug("Channel cmd: {} | "
                  "Channel option: {}".format(cmd, option))
 
@@ -203,6 +206,9 @@ def main():
 
         if msgBody:
             cmd, option = is_cmd(msgBody)
+
+            if not cmd:
+                continue
 
             # validate the command against cmd_list
             if not validate_cmd(cmd):
